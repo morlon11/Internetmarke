@@ -1,33 +1,53 @@
+import dotenv from 'dotenv';
 import express, { Express, Request, Response } from 'express';
-import { purchasePostage } from './services/dhlservice.js';
+import { getAuthToken } from './dhl/auth.service.js';
+import { AuthCredentials } from './dhl/auth.types.js';
+
+dotenv.config();
 
 const app: Express = express();
-const port: number = 3000;
-
 app.use(express.json());
 
+const PORT = process.env.PORT || 3000;
+
 app.get('/', (req: Request, res: Response) => {
-  res.status(200).send('API for Deutsche Post Internetmarke is running!');
+  res.send('Willkommen bei Internetmarke API');
 });
 
-app.post('/api/purchase-postage', async (req: Request, res: Response) => {
+app.get('/token', async (req: Request, res: Response) => {
+  const credentials: AuthCredentials = {
+    grant_type: 'client_credentials',
+    client_id: process.env.DHL_CLIENT_ID || '',
+    client_secret: process.env.DHL_CLIENT_SECRET || '',
+    username: process.env.DHL_USERNAME || '',
+    password: process.env.DHL_PASSWORD || '',
+  };
+
+  if (
+    !credentials.client_id ||
+    !credentials.client_secret ||
+    !credentials.username ||
+    !credentials.password
+  ) {
+    return res
+      .status(500)
+      .send(
+        'Fehler: Die Authentifizierungsdaten fehlen in den Umgebungsvariablen.',
+      );
+  }
+
   try {
-    const trackingNumbers = await purchasePostage(req.body);
-    res.status(200).json({ trackingNumbers });
-  } catch (error) {
+    const token = await getAuthToken(credentials);
+    res.status(200).send({ token });
+  } catch (error: unknown) {
+    let errorMessage = 'Ein unbekannter Fehler ist aufgetreten.';
     if (error instanceof Error) {
-      console.error('Error during postage purchase:', error.message);
-      res.status(500).json({
-        error: 'Failed to process postage purchase',
-        details: error.message,
-      });
-    } else {
-      console.error('An unknown error occurred:', error);
-      res.status(500).json({ error: 'An unknown error occurred.' });
+      errorMessage = error.message;
     }
+    res.status(500).send({ message: errorMessage });
   }
 });
 
-app.listen(port, () => {
-  console.log(`API listening on http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server läuft auf Port ${PORT}`);
 });
