@@ -23,7 +23,7 @@ router.post('/user', async (req: Request, res: Response) => {
   }
 
   try {
-    const token = await getAuthToken(credentials);
+    const token = await getAuthToken();
     res.status(200).send({ token });
   } catch (error: unknown) {
     let errorMessage = 'An unknown error occurred.';

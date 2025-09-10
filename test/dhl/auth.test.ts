@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
+dotenv.config();
+
 import { getAuthToken } from '../../src/dhl/auth.service.js';
-import { AuthCredentials } from '../../src/dhl/auth.types.js';
+import { getCredentials } from '../../src/dhl/credentials.js';
 
 // global handler for unhandled promises
 process.on('unhandledRejection', (reason, promise) => {
@@ -8,32 +10,22 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-// Variables for authentication
-dotenv.config();
-const credentials: AuthCredentials = {
-  grant_type: 'client_credentials',
-  client_id: process.env.DHL_CLIENT_ID || '',
-  client_secret: process.env.DHL_CLIENT_SECRET || '',
-  username: process.env.DHL_USERNAME || '',
-  password: process.env.DHL_PASSWORD || '',
-};
-
 async function testAuthService() {
   console.log(
     'ID: ' +
-      credentials.client_id +
+      getCredentials().client_id +
       ', Secret: ' +
-      credentials.client_secret +
+      getCredentials().client_secret +
       ', Usert: ' +
-      credentials.username +
+      getCredentials().username +
       ', Password: ' +
-      credentials.password,
+      getCredentials().password,
   );
   if (
-    !credentials.client_id ||
-    !credentials.client_secret ||
-    !credentials.username ||
-    !credentials.password
+    !getCredentials().client_id ||
+    !getCredentials().client_secret ||
+    !getCredentials().username ||
+    !getCredentials().password
   ) {
     console.error(
       'Fehler: Die Authentifizierungsdaten fehlen in den Umgebungsvariablen. Bitte stellen Sie sicher, dass Ihre .env-Datei korrekt ist.',
@@ -43,7 +35,7 @@ async function testAuthService() {
 
   try {
     console.log('Try to get an auth token...');
-    const token = await getAuthToken(credentials);
+    const token = await getAuthToken();
     if (token) {
       console.log('Here the received token:', token);
       console.log('Test was successful.');
