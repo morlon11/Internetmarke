@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { getAuthToken } from '../../src/dhl/auth.service.js';
-import { getCredentials } from '../../src/dhl/credentials.js';
+import { getCredentials } from '../../src/credentials.js';
 
 // global handler for unhandled promises
 process.on('unhandledRejection', (reason, promise) => {

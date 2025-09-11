@@ -5,7 +5,7 @@
  */
 
 import axios, { AxiosResponse } from 'axios';
-import { getCredentials } from './credentials.js';
+import { getCredentials } from '../credentials.js';
 
 /**
  * @typedef {Object} AuthResponse

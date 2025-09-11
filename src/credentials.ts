@@ -3,7 +3,7 @@
  * @description Centralized handling of authentication credentials, retrieved from environment variables.
  */
 
-import { AuthCredentials } from './auth.types.js';
+import { AuthCredentials } from './dhl/auth.types.js';
 
 /**
  * Retrieves authentication credentials from environment variables.
