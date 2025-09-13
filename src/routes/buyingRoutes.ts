@@ -28,7 +28,9 @@ router.get('/', async (req, res) => {
     if (success) {
       res.status(200).json({ link: data });
     } else {
-      res.status(500).send('Fehler beim Erstellen des Etiketts: ' + data);
+      res
+        .status(500)
+        .send('Fehler beim Erstellen des Etiketts: ' + JSON.stringify(result));
     }
   } catch (error) {
     console.error('An error occurred:', error);

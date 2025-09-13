@@ -48,6 +48,7 @@ export async function getAuthToken(): Promise<string | null> {
         'API authentication error:',
         error.response?.data || error.message,
       );
+      console.log(data);
     } else {
       console.error('An unexpected error occurred:', error);
     }

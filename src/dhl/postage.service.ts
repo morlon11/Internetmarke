@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, AxiosError } from 'axios'; // AxiosError importieren
 import { getAuthToken } from './auth.service.js';
 import {
   AppShoppingCartPDFRequest,
@@ -15,10 +15,10 @@ const SENDER_ADDRESS: Address = {
 };
 
 /**
- * Erstellt ein Versandetikett über die neue Deutsche Post API.
+ * Create shipping label with Deutsche Post Internetmarke API
  *
- * @param {AppShoppingCartPDFRequest} requestData - Die Daten für die PDF-Anfrage.
- * @returns {Promise<string | null>} Der Link zum herunterladbaren Etikett auf Erfolg, sonst null.
+ * @param {AppShoppingCartPDFRequest} requestData - data for shipping label
+ * @returns {Promise<string | null>} - download link for the created label
  */
 export async function createShippingLabel(
   receiverAddress: Address,
@@ -37,7 +37,7 @@ export async function createShippingLabel(
     pageFormatId: 13,
     positions: [
       {
-        productCode: 290, // Produktcode für Warensendung
+        productCode: 290, // product code for warensendung
         address: {
           sender: SENDER_ADDRESS,
           receiver: receiverAddress,
@@ -72,13 +72,42 @@ export async function createShippingLabel(
       : { success: false, data: response };
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error(
-        'API error while creating shipping label:',
-        error.response?.data || error.message,
-      );
+      const axiosError = error as AxiosError;
+
+      // Check if the error is that for THIS order id a label was already created
+      if (
+        axiosError.response &&
+        axiosError.response.status === 400 &&
+        axiosError.response.data &&
+        (axiosError.response.data as any).message ===
+          'Request failed with status code 400'
+      ) {
+        console.error(
+          `Fehler: Die Shop-Bestellnummer "${orderid}" wurde bereits verwendet. Bitte eine neue Nummer angeben.`,
+          axiosError.response.data,
+        );
+        return {
+          success: false,
+          data: `Fehler: Die Shop-Bestellnummer "${orderid}" wurde bereits verwendet. Bitte eine neue Nummer angeben.`,
+        };
+      } else {
+        // other axios errors
+        console.error(
+          'API error while creating shipping label:',
+          axiosError.response?.data || axiosError.message,
+        );
+        return {
+          success: false,
+          data: axiosError.response?.data || axiosError.message,
+        };
+      }
     } else {
+      // other errors
       console.error('An unexpected error occurred:', error);
+      return {
+        success: false,
+        data: 'An unexpected error occurred: ' + JSON.stringify(error),
+      };
     }
-    return { success: false, data: error };
   }
 }
