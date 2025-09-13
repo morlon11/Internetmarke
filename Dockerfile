@@ -13,5 +13,6 @@ COPY package*.json ./
 RUN rm -rf dist
 RUN npm install --only=production
 COPY . .
+RUN npm run build
 CMD [ "node", "dist/index.js" ]
 
