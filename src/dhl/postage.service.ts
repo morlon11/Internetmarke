@@ -23,11 +23,12 @@ const SENDER_ADDRESS: Address = {
 export async function createShippingLabel(
   receiverAddress: Address,
   orderid: string,
-): Promise<string | null> {
+): Promise<{ success: true; data: string } | { success: false; data: any }> {
   const token = await getAuthToken();
   if (!token) {
-    console.error('Authentication token could not be retrieved.');
-    return null;
+    const errorMsg = 'Authentication token could not be retrieved:';
+    console.error(errorMsg);
+    return { success: false, data: errorMsg };
   }
 
   const requestData: AppShoppingCartPDFRequest = {
@@ -66,7 +67,9 @@ export async function createShippingLabel(
           },
         },
       );
-    return response.data.link;
+    return response.data.link
+      ? { success: true, data: response.data.link }
+      : { success: false, data: response };
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(
@@ -76,6 +79,6 @@ export async function createShippingLabel(
     } else {
       console.error('An unexpected error occurred:', error);
     }
-    return null;
+    return { success: false, data: error };
   }
 }

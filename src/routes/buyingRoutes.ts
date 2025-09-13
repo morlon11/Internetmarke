@@ -19,12 +19,16 @@ router.get('/', async (req, res) => {
   };
 
   try {
-    const labelLink = await createShippingLabel(requestData, orderid as string);
+    const result = await createShippingLabel(requestData, orderid as string);
+    let success = result.success;
+    let data = result.data;
 
-    if (labelLink) {
-      res.status(200).json({ link: labelLink });
+    console.log(result);
+
+    if (success) {
+      res.status(200).json({ link: data });
     } else {
-      res.status(500).send('Fehler beim Erstellen des Etiketts.');
+      res.status(500).send('Fehler beim Erstellen des Etiketts: ' + data);
     }
   } catch (error) {
     console.error('An error occurred:', error);
